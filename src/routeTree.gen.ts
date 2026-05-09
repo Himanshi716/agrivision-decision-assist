@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScanRouteImport } from './routes/scan'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as HistoryRouteImport } from './routes/history'
@@ -16,6 +17,11 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultIdRouteImport } from './routes/result.$id'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScanRoute = ScanRouteImport.update({
   id: '/scan',
   path: '/scan',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
+  '/settings': typeof SettingsRoute
   '/result/$id': typeof ResultIdRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
+  '/settings': typeof SettingsRoute
   '/result/$id': typeof ResultIdRoute
 }
 export interface FileRoutesById {
@@ -70,13 +78,28 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
+  '/settings': typeof SettingsRoute
   '/result/$id': typeof ResultIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/compare' | '/history' | '/learn' | '/scan' | '/result/$id'
+  fullPaths:
+    | '/'
+    | '/compare'
+    | '/history'
+    | '/learn'
+    | '/scan'
+    | '/settings'
+    | '/result/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/compare' | '/history' | '/learn' | '/scan' | '/result/$id'
+  to:
+    | '/'
+    | '/compare'
+    | '/history'
+    | '/learn'
+    | '/scan'
+    | '/settings'
+    | '/result/$id'
   id:
     | '__root__'
     | '/'
@@ -84,6 +107,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/learn'
     | '/scan'
+    | '/settings'
     | '/result/$id'
   fileRoutesById: FileRoutesById
 }
@@ -93,11 +117,19 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   LearnRoute: typeof LearnRoute
   ScanRoute: typeof ScanRoute
+  SettingsRoute: typeof SettingsRoute
   ResultIdRoute: typeof ResultIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scan': {
       id: '/scan'
       path: '/scan'
@@ -149,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   LearnRoute: LearnRoute,
   ScanRoute: ScanRoute,
+  SettingsRoute: SettingsRoute,
   ResultIdRoute: ResultIdRoute,
 }
 export const routeTree = rootRouteImport
