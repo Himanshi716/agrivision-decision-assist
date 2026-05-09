@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      feedback: {
+        Row: {
+          created_at: string
+          device_id: string
+          helpful: boolean
+          id: string
+          note: string | null
+          scan_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          helpful: boolean
+          id?: string
+          note?: string | null
+          scan_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          helpful?: boolean
+          id?: string
+          note?: string | null
+          scan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scans: {
+        Row: {
+          confidence: number
+          created_at: string
+          device_id: string
+          has_image: boolean
+          id: string
+          item_type: string
+          reason: string
+          recommendation: string
+          ripeness_stage: string
+          score: number
+          traits: Json
+          verdict: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          device_id: string
+          has_image?: boolean
+          id?: string
+          item_type: string
+          reason: string
+          recommendation: string
+          ripeness_stage: string
+          score: number
+          traits?: Json
+          verdict: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          device_id?: string
+          has_image?: boolean
+          id?: string
+          item_type?: string
+          reason?: string
+          recommendation?: string
+          ripeness_stage?: string
+          score?: number
+          traits?: Json
+          verdict?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
