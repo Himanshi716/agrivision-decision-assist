@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ScanRouteImport } from './routes/scan'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultIdRouteImport } from './routes/result.$id'
@@ -23,6 +24,11 @@ const ScanRoute = ScanRouteImport.update({
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompareRoute = CompareRouteImport.update({
@@ -44,6 +50,7 @@ const ResultIdRoute = ResultIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
+  '/history': typeof HistoryRoute
   '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
   '/result/$id': typeof ResultIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
+  '/history': typeof HistoryRoute
   '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
   '/result/$id': typeof ResultIdRoute
@@ -59,21 +67,30 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
+  '/history': typeof HistoryRoute
   '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
   '/result/$id': typeof ResultIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/compare' | '/learn' | '/scan' | '/result/$id'
+  fullPaths: '/' | '/compare' | '/history' | '/learn' | '/scan' | '/result/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/compare' | '/learn' | '/scan' | '/result/$id'
-  id: '__root__' | '/' | '/compare' | '/learn' | '/scan' | '/result/$id'
+  to: '/' | '/compare' | '/history' | '/learn' | '/scan' | '/result/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/compare'
+    | '/history'
+    | '/learn'
+    | '/scan'
+    | '/result/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompareRoute: typeof CompareRoute
+  HistoryRoute: typeof HistoryRoute
   LearnRoute: typeof LearnRoute
   ScanRoute: typeof ScanRoute
   ResultIdRoute: typeof ResultIdRoute
@@ -93,6 +110,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compare': {
@@ -122,6 +146,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompareRoute: CompareRoute,
+  HistoryRoute: HistoryRoute,
   LearnRoute: LearnRoute,
   ScanRoute: ScanRoute,
   ResultIdRoute: ResultIdRoute,
