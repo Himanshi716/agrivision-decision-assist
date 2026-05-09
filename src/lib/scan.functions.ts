@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { analyze, type AnalysisResult } from "./analysis";
+import type { Json } from "@/integrations/supabase/types";
 
 const DeviceSchema = z.string().min(8).max(128);
 
@@ -31,7 +32,7 @@ export const analyzeScan = createServerFn({ method: "POST" })
         reason: result.reason,
         recommendation: result.recommendation,
         ripeness_stage: result.ripenessStage,
-        traits: result.traits as unknown as never,
+        traits: result.traits as unknown as Json,
         has_image: !!data.hasImage,
       })
       .select()
