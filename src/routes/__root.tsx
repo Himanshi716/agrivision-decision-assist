@@ -75,11 +75,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "AgriVision AI — Visual produce intelligence" },
       { name: "description", content: "Real-time AI quality scanning for fruits and vegetables. Best Pick, Use Soon, or Avoid — in seconds." },
       { name: "author", content: "AgriVision AI" },
-      { property: "og:title", content: "AgriVision AI" },
-      { property: "og:description", content: "AI-powered produce freshness intelligence for consumers, students, and retail." },
+      { property: "og:title", content: "AgriVision AI — Visual produce intelligence" },
+      { property: "og:description", content: "Real-time AI quality scanning for fruits and vegetables. Best Pick, Use Soon, or Avoid — in seconds." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "AgriVision AI — Visual produce intelligence" },
+      { name: "twitter:description", content: "Real-time AI quality scanning for fruits and vegetables. Best Pick, Use Soon, or Avoid — in seconds." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/82224f2e-e11b-4afb-becb-91bb4efc6fb1/id-preview-460275dd--c1929041-6863-4d6a-aff7-a8cb684d40ca.lovable.app-1778355500904.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/82224f2e-e11b-4afb-becb-91bb4efc6fb1/id-preview-460275dd--c1929041-6863-4d6a-aff7-a8cb684d40ca.lovable.app-1778355500904.png" },
     ],
     links: [
       {
