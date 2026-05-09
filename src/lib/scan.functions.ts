@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { analyze, type AnalysisResult } from "./analysis";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -113,6 +112,7 @@ export const clearScans = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ClearInput.parse(input))
   .handler(async ({ data }) => {
     // Deletions bypass RLS — scoped strictly to the validated device_id.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("scans").delete().eq("device_id", data.deviceId);
     if (error) {
       console.error("clearScans error", error);
