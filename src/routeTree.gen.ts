@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ScanRouteImport } from './routes/scan'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResultIdRouteImport } from './routes/result.$id'
@@ -17,6 +18,11 @@ import { Route as ResultIdRouteImport } from './routes/result.$id'
 const ScanRoute = ScanRouteImport.update({
   id: '/scan',
   path: '/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompareRoute = CompareRouteImport.update({
@@ -38,12 +44,14 @@ const ResultIdRoute = ResultIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
+  '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
   '/result/$id': typeof ResultIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
+  '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
   '/result/$id': typeof ResultIdRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
+  '/learn': typeof LearnRoute
   '/scan': typeof ScanRoute
   '/result/$id': typeof ResultIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/compare' | '/scan' | '/result/$id'
+  fullPaths: '/' | '/compare' | '/learn' | '/scan' | '/result/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/compare' | '/scan' | '/result/$id'
-  id: '__root__' | '/' | '/compare' | '/scan' | '/result/$id'
+  to: '/' | '/compare' | '/learn' | '/scan' | '/result/$id'
+  id: '__root__' | '/' | '/compare' | '/learn' | '/scan' | '/result/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompareRoute: typeof CompareRoute
+  LearnRoute: typeof LearnRoute
   ScanRoute: typeof ScanRoute
   ResultIdRoute: typeof ResultIdRoute
 }
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/scan'
       fullPath: '/scan'
       preLoaderRoute: typeof ScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compare': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompareRoute: CompareRoute,
+  LearnRoute: LearnRoute,
   ScanRoute: ScanRoute,
   ResultIdRoute: ResultIdRoute,
 }
