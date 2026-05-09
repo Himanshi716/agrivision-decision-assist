@@ -31,7 +31,7 @@ export const analyzeScan = createServerFn({ method: "POST" })
         reason: result.reason,
         recommendation: result.recommendation,
         ripeness_stage: result.ripenessStage,
-        traits: result.traits as unknown as object,
+        traits: result.traits as unknown as never,
         has_image: !!data.hasImage,
       })
       .select()
