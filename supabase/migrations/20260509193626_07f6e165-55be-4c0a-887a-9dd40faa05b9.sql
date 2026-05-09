@@ -1,0 +1,1 @@
+drop policy if exists "scans_delete_own_device" on public.scans;

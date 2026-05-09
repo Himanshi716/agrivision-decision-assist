@@ -2,8 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Upload, Zap, ZapOff, Sparkles, ImageIcon, Loader2 } from "lucide-react";
 import { itemTypes } from "@/lib/learn-content";
-import { analyze } from "@/lib/analysis";
-import { addToHistory } from "@/lib/storage";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeScan } from "@/lib/scan.functions";
+import { getDeviceId } from "@/lib/device";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/scan")({
   component: ScanPage,
@@ -20,6 +22,7 @@ function ScanPage() {
   const [flash, setFlash] = useState(false);
   const [imageData, setImageData] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const analyzeFn = useServerFn(analyzeScan);
 
   useEffect(() => {
     let active = true;
@@ -69,11 +72,23 @@ function ScanPage() {
 
   async function runAnalysis(dataUrl: string | null) {
     setAnalyzing(true);
-    await new Promise((r) => setTimeout(r, 900));
-    const result = analyze({ itemType: item, imageDataUrl: dataUrl ?? undefined });
-    addToHistory(result);
-    setAnalyzing(false);
-    navigate({ to: "/result/$id", params: { id: result.id } });
+    try {
+      const seed = dataUrl ? await fingerprint(dataUrl) : undefined;
+      const { id } = await analyzeFn({
+        data: {
+          deviceId: getDeviceId(),
+          itemType: item,
+          hasImage: !!dataUrl,
+          imageSeed: seed,
+        },
+      });
+      navigate({ to: "/result/$id", params: { id } });
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not analyze. Please try again.");
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   function onCapture() {
@@ -198,4 +213,16 @@ function ScanPage() {
       />
     </div>
   );
+}
+
+// Tiny fingerprint of the captured image so the server can deterministically
+// seed analysis without us ever uploading the bytes.
+async function fingerprint(dataUrl: string): Promise<string> {
+  const slice = dataUrl.slice(0, 4096);
+  const bytes = new TextEncoder().encode(slice);
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash))
+    .slice(0, 16)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }

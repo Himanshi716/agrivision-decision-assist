@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { Home, ScanLine, GitCompare, BookOpen, History, Settings, Leaf } from "lucide-react";
 import { useEffect } from "react";
 import { getSettings } from "@/lib/storage";
+import { Toaster } from "sonner";
 
 const tabs = [
   { to: "/", icon: Home, label: "Home" },
@@ -66,6 +67,7 @@ export function AppShell() {
           })}
         </div>
       </nav>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ScanLine, ThumbsDown, ThumbsUp, GitCompare } from "lucide-react";
-import { getHistory, addFeedback } from "@/lib/storage";
-import type { AnalysisResult } from "@/lib/analysis";
+import { ArrowLeft, ScanLine, ThumbsDown, ThumbsUp, GitCompare, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { getScan, submitFeedback, type ScanRow } from "@/lib/scan.functions";
+import { getDeviceId } from "@/lib/device";
 import { VerdictBadge } from "@/components/VerdictBadge";
+import { itemTypes } from "@/lib/learn-content";
 
 export const Route = createFileRoute("/result/$id")({
   component: ResultPage,
@@ -11,13 +13,32 @@ export const Route = createFileRoute("/result/$id")({
 
 function ResultPage() {
   const { id } = Route.useParams();
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<ScanRow | null>(null);
+  const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
+  const fetchScan = useServerFn(getScan);
+  const sendFeedback = useServerFn(submitFeedback);
 
   useEffect(() => {
-    const h = getHistory().find((r) => r.id === id);
-    setResult(h ?? null);
-  }, [id]);
+    let active = true;
+    setLoading(true);
+    fetchScan({ data: { id } })
+      .then(({ scan }) => {
+        if (active) setResult(scan);
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [id, fetchScan]);
+
+  if (loading) {
+    return (
+      <div className="grid place-items-center py-24 text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
 
   if (!result) {
     return (
@@ -30,10 +51,14 @@ function ResultPage() {
     );
   }
 
-  function recordFeedback(helpful: boolean) {
+  async function recordFeedback(helpful: boolean) {
     if (!result) return;
     setFeedback(helpful ? "up" : "down");
-    addFeedback({ resultId: result.id, helpful });
+    try {
+      await sendFeedback({ data: { deviceId: getDeviceId(), scanId: result.id, helpful } });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   const ringTone =
@@ -42,6 +67,8 @@ function ResultPage() {
       : result.verdict === "Use Soon"
         ? "var(--warning)"
         : "var(--destructive)";
+
+  const emoji = itemTypes.find((i) => i.value === result.item_type)?.emoji ?? "🌿";
 
   return (
     <div className="space-y-5">
@@ -54,11 +81,7 @@ function ResultPage() {
         style={{ boxShadow: "var(--shadow-card)" }}
       >
         <div className="aspect-video w-full bg-muted relative">
-          {result.imageDataUrl ? (
-            <img src={result.imageDataUrl} alt={result.itemType} className="h-full w-full object-cover" />
-          ) : (
-            <div className="h-full w-full grid place-items-center text-7xl">🍌</div>
-          )}
+          <div className="h-full w-full grid place-items-center text-7xl">{emoji}</div>
           <div className="absolute top-3 left-3">
             <VerdictBadge verdict={result.verdict} size="lg" />
           </div>
@@ -68,8 +91,8 @@ function ResultPage() {
           <div className="flex items-end justify-between">
             <div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Detected</div>
-              <div className="text-xl font-semibold">{result.itemType}</div>
-              <div className="text-sm text-muted-foreground mt-0.5">{result.ripenessStage}</div>
+              <div className="text-xl font-semibold">{result.item_type}</div>
+              <div className="text-sm text-muted-foreground mt-0.5">{result.ripeness_stage}</div>
             </div>
             <div className="relative h-20 w-20">
               <svg viewBox="0 0 36 36" className="h-20 w-20 -rotate-90">
