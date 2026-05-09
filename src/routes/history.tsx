@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Trash2, ScanLine } from "lucide-react";
-import { clearHistory, getHistory } from "@/lib/storage";
-import type { AnalysisResult } from "@/lib/analysis";
+import { useEffect, useState, useCallback } from "react";
+import { Trash2, ScanLine, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { listScans, clearScans, type ScanRow } from "@/lib/scan.functions";
+import { getDeviceId } from "@/lib/device";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { itemTypes } from "@/lib/learn-content";
 
@@ -11,14 +12,27 @@ export const Route = createFileRoute("/history")({
 });
 
 function HistoryPage() {
-  const [items, setItems] = useState<AnalysisResult[]>([]);
+  const [items, setItems] = useState<ScanRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const fetchHistory = useServerFn(listScans);
+  const clearAllFn = useServerFn(clearScans);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { scans } = await fetchHistory({ data: { deviceId: getDeviceId() } });
+      setItems(scans);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchHistory]);
 
   useEffect(() => {
-    setItems(getHistory());
-  }, []);
+    refresh();
+  }, [refresh]);
 
-  function clearAll() {
-    clearHistory();
+  async function clearAll() {
+    await clearAllFn({ data: { deviceId: getDeviceId() } });
     setItems([]);
   }
 
@@ -27,7 +41,9 @@ function HistoryPage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">History</h1>
-          <p className="text-sm text-muted-foreground">{items.length} past scans</p>
+          <p className="text-sm text-muted-foreground">
+            {loading ? "Loading…" : `${items.length} past scans`}
+          </p>
         </div>
         {items.length > 0 && (
           <button
@@ -39,7 +55,11 @@ function HistoryPage() {
         )}
       </div>
 
-      {items.length === 0 ? (
+      {loading ? (
+        <div className="grid place-items-center py-16 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      ) : items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center space-y-3">
           <p className="text-muted-foreground text-sm">No scans yet.</p>
           <Link
@@ -53,7 +73,7 @@ function HistoryPage() {
       ) : (
         <div className="space-y-2">
           {items.map((r) => {
-            const emoji = itemTypes.find((i) => i.value === r.itemType)?.emoji ?? "🌿";
+            const emoji = itemTypes.find((i) => i.value === r.item_type)?.emoji ?? "🌿";
             return (
               <Link
                 key={r.id}
@@ -62,19 +82,15 @@ function HistoryPage() {
                 className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 hover:border-primary/40 transition"
               >
                 <div className="h-12 w-12 rounded-xl bg-muted grid place-items-center text-2xl overflow-hidden">
-                  {r.imageDataUrl ? (
-                    <img src={r.imageDataUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <span>{emoji}</span>
-                  )}
+                  <span>{emoji}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{r.itemType}</span>
+                    <span className="font-medium">{r.item_type}</span>
                     <VerdictBadge verdict={r.verdict} size="sm" />
                   </div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {new Date(r.createdAt).toLocaleString()} · {r.ripenessStage}
+                    {new Date(r.created_at).toLocaleString()} · {r.ripeness_stage}
                   </div>
                 </div>
                 <div className="text-right">
