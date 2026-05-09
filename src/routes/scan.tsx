@@ -73,7 +73,7 @@ function ScanPage() {
     const result = analyze({ itemType: item, imageDataUrl: dataUrl ?? undefined });
     addToHistory(result);
     setAnalyzing(false);
-    navigate({ to: "/result/$id", params: { id: result.id }, state: { result } as any });
+    navigate({ to: "/result/$id", params: { id: result.id } });
   }
 
   function onCapture() {
